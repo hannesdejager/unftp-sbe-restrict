@@ -1,25 +1,25 @@
 [package]
 name = "unftp-sbe-restrict"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Hannes de Jager <hannes.de.jager@gmail.com>"]
-description = "A libunftp wrapper storage back-end that restrict FTP operations."
+description = "A libunftp wrapper storage back-end that restricts FTP operations."
 repository = "https://github.com/hannesdejager/unftp-sbe-restrict"
 homepage = "https://github.com/hannesdejager/unftp-sbe-restrict"
 license = "Apache-2.0"
 readme = "README.md"
 keywords = ["libunftp", "unftp"]
 categories = ["network-programming"]
-documentation = "https://github.com/hannesdejager/unftp-sbe-restrict"
+documentation = "https://docs.rs/unftp-sbe-restrict/latest/unftp_sbe_restrict/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 async-trait = "0.1.73"
-libunftp = "0.18.9"
+libunftp = "0.19.0"
 tokio = { version = "1.32.0" }
-bitflags = "1.3.2"
+bitflags = "2.4.0"
 
 [dev-dependencies]
 pretty_assertions = "1.4.0"
-unftp-sbe-fs = "0.2.2"
+unftp-sbe-fs = "0.2.3"

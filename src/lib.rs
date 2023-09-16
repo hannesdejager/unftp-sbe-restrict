@@ -1,3 +1,60 @@
+#![deny(clippy::all)]
+#![deny(missing_docs)]
+#![forbid(unsafe_code)]
+#![doc(html_root_url = "https://docs.rs/unftp-sbe-restrict/0.1.1")]
+
+//! A [libunftp](https://docs.rs/libunftp/latest/libunftp/) wrapper
+//! storage back-end that restricts FTP operations and in so doing
+//! provide some form of authorization.
+//!
+//! # Quick start
+//!
+//! Start by implementing the libunftp [`UserDetail`](libunftp::auth::UserDetail) trait
+//! and then follow that by implementing [`UserWithPermissions`](crate::UserWithPermissions).
+//!
+//! Finally call the [RestrictingVfs::new()](crate::RestrictingVfs::new) method.
+//!
+//! ```rust
+//! use libunftp::auth::UserDetail;
+//! use unftp_sbe_restrict::{UserWithPermissions, VfsOperations};
+//! use std::fmt::Formatter;
+//!
+//! #[derive(Debug, PartialEq, Eq)]
+//! pub struct User {
+//!     pub username: String,
+//!     // e.g. this can be something like
+//!     // `VfsOperations::all() - VfsOperations::PUT - VfsOperations::DEL`
+//!     pub permissions: VfsOperations,
+//! }
+//!
+//! impl UserDetail for User {
+//!     fn account_enabled(&self) -> bool {
+//!         true
+//!     }
+//! }
+//!
+//! impl std::fmt::Display for User {
+//!     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+//!         write!(f, "User(username: {:?}", self.username,)
+//!     }
+//! }
+//!
+//! impl UserWithPermissions for User {
+//!     fn permissions(&self) -> VfsOperations {
+//!         self.permissions
+//!     }
+//! }
+//!
+//! // Return type omited for brevity.
+//! fn create_restricted_storage_backend() {
+//!     use unftp_sbe_fs::{Filesystem, Meta};
+//!     let _backend = Box::new(move || {
+//!         unftp_sbe_restrict::RestrictingVfs::<Filesystem, User, Meta>::new(Filesystem::new("/srv/ftp"))
+//!     });
+//! }
+//!
+// ```
+
 use async_trait::async_trait;
 use bitflags::bitflags;
 use libunftp::{
@@ -11,17 +68,28 @@ use std::path::{Path, PathBuf};
 use tokio::io::AsyncRead;
 
 bitflags! {
+    /// The FTP operations that can be enabled/disabled for the virtual filesystem.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct VfsOperations: u32 {
+        /// If set allows FTP make directory
         const MK_DIR = 0b00000001;
+        /// If set allows FTP remove directory
         const RM_DIR = 0b00000010;
+        /// If set allows FTP GET i.e. clients can download files.
         const GET    = 0b00000100;
+        /// If set allows FTP PUT i.e. clients can upload files.
         const PUT    = 0b00001000;
+        /// If set allows FTP DELE i.e. clients can remove files.
         const DEL    = 0b00010000;
+        /// If set allows FTP RENAME i.e. clients can rename directories and files
         const RENAME = 0b00100000;
+        /// If set allows the extended SITE MD5 command to calculate checksums
         const MD5    = 0b01000000;
+        /// If set allows clients to list the contents of a directory.
         const LIST   = 0b10000000;
 
-        const WRITE_OPS = Self::MK_DIR.bits | Self::RM_DIR.bits | Self::PUT.bits | Self::DEL.bits | Self::RENAME.bits;
+        /// Convenience aggragation of all the write operation bits.
+        const WRITE_OPS = Self::MK_DIR.bits() | Self::RM_DIR.bits() | Self::PUT.bits() | Self::DEL.bits() | Self::RENAME.bits();
     }
 }
 
@@ -51,6 +119,7 @@ where
     User: UserWithPermissions,
     Meta: Metadata + Debug + Sync + Send,
 {
+    /// Creates a new instance of [`RestrictingVfs`](crate::RestrictingVfs).
     pub fn new(delegate: Delegate) -> Self {
         RestrictingVfs {
             delegate,
