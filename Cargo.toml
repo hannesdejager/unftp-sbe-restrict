@@ -1,6 +1,6 @@
 [package]
 name = "unftp-sbe-restrict"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Hannes de Jager <hannes.de.jager@gmail.com>"]
 description = "A libunftp wrapper storage back-end that restricts FTP operations."
@@ -15,11 +15,11 @@ documentation = "https://docs.rs/unftp-sbe-restrict/latest/unftp_sbe_restrict/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-async-trait = "0.1.73"
-libunftp = "0.19.0"
-tokio = { version = "1.32.0" }
+async-trait = "0.1.80"
+libunftp = "0.20.0"
+tokio = { version = "1.37.0" }
 bitflags = "2.4.0"
 
 [dev-dependencies]
 pretty_assertions = "1.4.0"
-unftp-sbe-fs = "0.2.3"
+unftp-sbe-fs = "0.2.5"
