@@ -1,6 +1,6 @@
 [package]
 name = "unftp-sbe-restrict"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2024"
 authors = ["Hannes de Jager <hannes.de.jager@gmail.com>"]
 description = "A libunftp wrapper storage back-end that restricts FTP operations."
@@ -16,10 +16,12 @@ documentation = "https://docs.rs/unftp-sbe-restrict/latest/unftp_sbe_restrict/"
 
 [dependencies]
 async-trait = "0.1.88"
-libunftp = "0.22.0"
 tokio = { version = "1.44.2" }
 bitflags = "2.9.0"
+unftp-core = "0.1.0"
 
 [dev-dependencies]
 pretty_assertions = "1.4.1"
-unftp-sbe-fs = "0.2.6"
+unftp-sbe-fs = "0.4.0"
+libunftp = "0.23.0"
+

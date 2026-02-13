@@ -9,13 +9,13 @@
 //!
 //! # Quick start
 //!
-//! Start by implementing the libunftp [`UserDetail`](libunftp::auth::UserDetail) trait
+//! Start by implementing the unftp-core [`UserDetail`](unftp_core::auth::UserDetail) trait
 //! and then follow that by implementing [`UserWithPermissions`](crate::UserWithPermissions).
 //!
 //! Finally call the [RestrictingVfs::new()](crate::RestrictingVfs::new) method.
 //!
 //! ```rust
-//! use libunftp::auth::UserDetail;
+//! use unftp_core::auth::UserDetail;
 //! use unftp_sbe_restrict::{UserWithPermissions, VfsOperations};
 //! use std::fmt::Formatter;
 //!
@@ -49,7 +49,7 @@
 //! fn create_restricted_storage_backend() {
 //!     use unftp_sbe_fs::{Filesystem, Meta};
 //!     let _backend = Box::new(move || {
-//!         unftp_sbe_restrict::RestrictingVfs::<Filesystem, User, Meta>::new(Filesystem::new("/srv/ftp"))
+//!         unftp_sbe_restrict::RestrictingVfs::<Filesystem, User, Meta>::new(Filesystem::new("/srv/ftp").unwrap())
 //!     });
 //! }
 //!
@@ -57,15 +57,15 @@
 
 use async_trait::async_trait;
 use bitflags::bitflags;
-use libunftp::{
-    auth::UserDetail,
-    storage::{self, Fileinfo, Metadata, StorageBackend},
-};
 use std::fmt::Debug;
 use std::io::{Cursor, Error, ErrorKind};
 use std::marker::PhantomData;
 use std::path::{Path, PathBuf};
 use tokio::io::AsyncRead;
+use unftp_core::{
+    auth::UserDetail,
+    storage::{self, Fileinfo, Metadata, StorageBackend},
+};
 
 bitflags! {
     /// The FTP operations that can be enabled/disabled for the virtual filesystem.
@@ -93,7 +93,7 @@ bitflags! {
     }
 }
 
-/// Used by [RestrictingVfs] to obtain permission info from a [UserDetail](libunftp::auth::UserDetail) implementation
+/// Used by [RestrictingVfs] to obtain permission info from a [UserDetail](unftp_core::auth::UserDetail) implementation
 pub trait UserWithPermissions: UserDetail {
     /// Returns the permissions given to the user
     fn permissions(&self) -> VfsOperations;
@@ -165,7 +165,7 @@ where
         if user.permissions().contains(VfsOperations::MD5) {
             self.delegate.md5(user, path).await
         } else {
-            Err(libunftp::storage::ErrorKind::PermissionDenied.into())
+            Err(unftp_core::storage::ErrorKind::PermissionDenied.into())
         }
     }
 
@@ -180,7 +180,7 @@ where
         if user.permissions().contains(VfsOperations::LIST) {
             self.delegate.list(user, path).await
         } else {
-            Err(libunftp::storage::ErrorKind::PermissionDenied.into())
+            Err(unftp_core::storage::ErrorKind::PermissionDenied.into())
         }
     }
 
@@ -192,7 +192,7 @@ where
         if user.permissions().contains(VfsOperations::LIST) {
             self.delegate.list_fmt(user, path).await
         } else {
-            Err(libunftp::storage::ErrorKind::PermissionDenied.into())
+            Err(unftp_core::storage::ErrorKind::PermissionDenied.into())
         }
     }
 
@@ -222,7 +222,7 @@ where
         if user.permissions().contains(VfsOperations::GET) {
             self.delegate.get_into(user, path, start_pos, output).await
         } else {
-            Err(libunftp::storage::ErrorKind::PermissionDenied.into())
+            Err(unftp_core::storage::ErrorKind::PermissionDenied.into())
         }
     }
 
@@ -235,7 +235,7 @@ where
         if user.permissions().contains(VfsOperations::GET) {
             self.delegate.get(user, path, start_pos).await
         } else {
-            Err(libunftp::storage::ErrorKind::PermissionDenied.into())
+            Err(unftp_core::storage::ErrorKind::PermissionDenied.into())
         }
     }
 
@@ -252,7 +252,7 @@ where
         if user.permissions().contains(VfsOperations::PUT) {
             self.delegate.put(user, input, path, start_pos).await
         } else {
-            Err(libunftp::storage::ErrorKind::PermissionDenied.into())
+            Err(unftp_core::storage::ErrorKind::PermissionDenied.into())
         }
     }
 
@@ -264,7 +264,7 @@ where
         if user.permissions().contains(VfsOperations::DEL) {
             self.delegate.del(user, path).await
         } else {
-            Err(libunftp::storage::ErrorKind::PermissionDenied.into())
+            Err(unftp_core::storage::ErrorKind::PermissionDenied.into())
         }
     }
 
@@ -276,7 +276,7 @@ where
         if user.permissions().contains(VfsOperations::MK_DIR) {
             self.delegate.mkd(user, path).await
         } else {
-            Err(libunftp::storage::ErrorKind::PermissionDenied.into())
+            Err(unftp_core::storage::ErrorKind::PermissionDenied.into())
         }
     }
 
@@ -289,7 +289,7 @@ where
         if user.permissions().contains(VfsOperations::RENAME) {
             self.delegate.rename(user, from, to).await
         } else {
-            Err(libunftp::storage::ErrorKind::PermissionDenied.into())
+            Err(unftp_core::storage::ErrorKind::PermissionDenied.into())
         }
     }
 
@@ -301,7 +301,7 @@ where
         if user.permissions().contains(VfsOperations::RM_DIR) {
             self.delegate.rmd(user, path).await
         } else {
-            Err(libunftp::storage::ErrorKind::PermissionDenied.into())
+            Err(unftp_core::storage::ErrorKind::PermissionDenied.into())
         }
     }
 
