@@ -1,16 +1,15 @@
 #![deny(clippy::all)]
 #![deny(missing_docs)]
 #![forbid(unsafe_code)]
-#![doc(html_root_url = "https://docs.rs/unftp-sbe-restrict/0.1.1")]
+#![doc(html_root_url = "https://docs.rs/unftp-sbe-restrict/0.1.6")]
 
-//! A [libunftp](https://docs.rs/libunftp/latest/libunftp/) wrapper
-//! storage back-end that restricts FTP operations and in so doing
-//! provide some form of authorization.
+//! A [libunftp](https://docs.rs/libunftp/latest/libunftp/) storage backend wrapper
+//! that checks per-user permissions before selected FTP operations.
 //!
 //! # Quick start
 //!
-//! Start by implementing the unftp-core [`UserDetail`](unftp_core::auth::UserDetail) trait
-//! and then follow that by implementing [`UserWithPermissions`](crate::UserWithPermissions).
+//! Start by implementing the unftp-core [`UserDetail`] trait
+//! and then follow that by implementing [`UserWithPermissions`].
 //!
 //! Finally call the [RestrictingVfs::new()](crate::RestrictingVfs::new) method.
 //!
@@ -35,7 +34,7 @@
 //!
 //! impl std::fmt::Display for User {
 //!     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-//!         write!(f, "User(username: {:?}", self.username,)
+//!         write!(f, "User(username: {:?})", self.username)
 //!     }
 //! }
 //!
@@ -45,7 +44,6 @@
 //!     }
 //! }
 //!
-//! // Return type omited for brevity.
 //! fn create_restricted_storage_backend() {
 //!     use unftp_sbe_fs::{Filesystem, Meta};
 //!     let _backend = Box::new(move || {
@@ -53,7 +51,7 @@
 //!     });
 //! }
 //!
-// ```
+//! ```
 
 use async_trait::async_trait;
 use bitflags::bitflags;
@@ -93,7 +91,7 @@ bitflags! {
     }
 }
 
-/// Used by [RestrictingVfs] to obtain permission info from a [UserDetail](unftp_core::auth::UserDetail) implementation
+/// Used by [RestrictingVfs] to obtain permission info from a [UserDetail] implementation.
 pub trait UserWithPermissions: UserDetail {
     /// Returns the permissions given to the user
     fn permissions(&self) -> VfsOperations;
@@ -119,7 +117,7 @@ where
     User: UserWithPermissions,
     Meta: Metadata + Debug + Sync + Send,
 {
-    /// Creates a new instance of [`RestrictingVfs`](crate::RestrictingVfs).
+    /// Creates a new instance of [`RestrictingVfs`].
     pub fn new(delegate: Delegate) -> Self {
         RestrictingVfs {
             delegate,
